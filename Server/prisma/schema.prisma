@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model conta {
+  email       String     @id @db.VarChar(255)
+  username    String     @db.VarChar(255)
+  senha       String    @db.VarChar(64)
+  historia historia[]
+}
+
+model elemento_narrativo {
+  id_elem_narr                                      Int         @id               @default(autoincrement())
+  Historia_id_historia                              Int
+  tipo                                              String?     @db.VarChar(45)
+  historia                                          historia    @relation(fields: [Historia_id_historia], references: [id_historia], onDelete: Cascade, onUpdate: Cascade, map: "fk_Elemento_narrativo_Historia1")
+  lugar                                             lugar?
+  outro                                             outro?
+  personagem                                        personagem?
+  relacao_relacao_id_elem_narr1Toelemento_narrativo relacao[]   @relation("relacao_id_elem_narr1Toelemento_narrativo")
+  relacao_relacao_id_elem_narr2Toelemento_narrativo relacao[]   @relation("relacao_id_elem_narr2Toelemento_narrativo")
+
+  @@index([Historia_id_historia], map: "fk_Elemento_narrativo_Historia1")
+}
+
+model historia {
+  id_historia        Int                  @id               @default(autoincrement())
+  nome               String?              @db.VarChar(255)
+  descricao          String?              @db.VarChar(3000)
+  path_img_capa      String?              @db.VarChar(255)
+  email_escritor     String               @db.VarChar(255)
+  prompt             String?              @db.VarChar(2000)
+  imgPrompt          String?              @db.VarChar(2000)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt        @default(now())
+  elemento_narrativo elemento_narrativo[]
+  conta              conta                @relation(fields: [email_escritor], references: [email], onDelete: Cascade, onUpdate: Cascade, map: "fk_Historia_Conta")
+
+  @@index([email_escritor], map: "fk_Historia_Conta")
+}
+
+model lugar {
+  id_elem_narr       Int                @id
+  nome               String?            @db.VarChar(255)
+  descricao          String?            @db.VarChar(3000)
+  imagem             String?            @db.VarChar(255)
+  riqueza            Int                @default(0)
+  saude              Int                @default(0)
+  seguranca          Int                @default(0)
+  agua               Int                @default(0)
+  prompt             String?            @db.VarChar(2000)
+  imgPrompt          String?            @db.VarChar(2000)
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt        @default(now())
+  elemento_narrativo elemento_narrativo @relation(fields: [id_elem_narr], references: [id_elem_narr], onDelete: Cascade, onUpdate: Cascade, map: "fk_Lugar_Elemento_narrativo1")
+  
+  @@index([id_elem_narr])
+}
+
+model outro {
+  id_elem_narr Int                @id
+  nome               String?      @db.VarChar(255)
+  descricao          String?      @db.VarChar(3000)
+  imagem             String?      @db.VarChar(255)
+  prompt             String?      @db.VarChar(2000)
+  imgPrompt          String?      @db.VarChar(2000)
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt        @default(now())
+  elemento_narrativo              elemento_narrativo @relation(fields: [id_elem_narr], references: [id_elem_narr], onDelete: Cascade, onUpdate: Cascade, map: "fk_Outro_Elemento_narrativo1")
+
+  @@index([id_elem_narr])
+}
+
+model personagem {
+  id_elem_narr       Int                @id
+  nome               String?            @db.VarChar(255)
+  descricao          String?            @db.VarChar(3000)
+  backstory          String?            @db.VarChar(2000)
+  especie            String?            @db.VarChar(255)
+  personalidade      String?            @db.VarChar(2000)
+  imagem             String?            @db.VarChar(255)
+  prompt             String?            @db.VarChar(2000)
+  imgPrompt          String?            @db.VarChar(2000)
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt        @default(now())
+  elemento_narrativo elemento_narrativo @relation(fields: [id_elem_narr], references: [id_elem_narr], onDelete: Cascade, onUpdate: Cascade, map: "fk_Personagem_Elemento_narrativo1")
+
+  @@index([id_elem_narr])
+}
+
+model relacao {
+  id_elem_narr1                                                Int
+  id_elem_narr2                                                Int
+  nome_relacao                                                 String?            @db.VarChar(255)
+  descricao                                                    String?            @db.VarChar(3000)
+  prompt                                                       String?            @db.VarChar(2000)
+  elemento_narrativo_relacao_id_elem_narr1Toelemento_narrativo elemento_narrativo @relation("relacao_id_elem_narr1Toelemento_narrativo", fields: [id_elem_narr1], references: [id_elem_narr], onDelete: Cascade, onUpdate: Cascade, map: "fk_Elemento_narrativo_has_Elemento_narrativo_Elemento_narrati1")
+  elemento_narrativo_relacao_id_elem_narr2Toelemento_narrativo elemento_narrativo @relation("relacao_id_elem_narr2Toelemento_narrativo", fields: [id_elem_narr2], references: [id_elem_narr], onDelete: Cascade, onUpdate: Cascade, map: "fk_Elemento_narrativo_has_Elemento_narrativo_Elemento_narrati2")
+
+  @@id([id_elem_narr1, id_elem_narr2])
+  @@index([id_elem_narr1], map: "fk_Elemento_narrativo_has_Elemento_narrativo_Elemento_narrati1")
+  @@index([id_elem_narr2], map: "fk_Elemento_narrativo_has_Elemento_narrativo_Elemento_narrati2")
+}
