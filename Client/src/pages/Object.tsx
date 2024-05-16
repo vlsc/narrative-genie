@@ -295,6 +295,7 @@ const ObjectPage: React.FC = () => {
   };
 
   const story = obj?.elemento_narrativo.historia;
+  const relatedIds = related.personagens.map( p => p.id_elem_narr).concat(related.lugares.map( p => p.id_elem_narr), related.objetos.map( p => p.id_elem_narr))
 
   return (
     <>
@@ -309,6 +310,7 @@ const ObjectPage: React.FC = () => {
         value={modalConfig.value}
         elemCategory="objeto"
         elemName={obj?.nome || "Nome"}
+        related={relatedIds}
       />)}
       {isOpenList && (<ModalList
         isOpen

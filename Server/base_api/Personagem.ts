@@ -6,6 +6,7 @@ import chatGPT from '../external/chatgpt';
 import waifuDiff from '../external/waifudiffusion';
 import { apagarPersonagem, atualizarPersonagem, buscarPersonagem, criarPersonagem, listarPersonagens } from '../controllers/Personagem';
 import { personagemPrompt } from '../helpers/prompt';
+import { buscarHistoria } from '../controllers/Historia';
 
 const PersonagemRouter = express.Router();
 
@@ -34,11 +35,15 @@ PersonagemRouter.patch('/:id', async (req, res) => {
 });
 
 PersonagemRouter.post('/', async (req, res) => {
-  const prompt = personagemPrompt(req.body['prompt']?.toString() || "Hello world");
+  const story = await buscarHistoria(parseInt(req.body.id_historia));
+  const contexto = story?.descricao
+  const prompt = personagemPrompt(req.body['prompt']?.toString() || "Hello world", contexto || "");
+  const initialPrompt = req.body['prompt']?.toString();
+
   const gptResult = await chatGPT.completion(prompt);
   const jsonResult = JSON.parse(gptResult.data.choices[0].message?.content.toString() || "");
   const imgPrompt = jsonResult.descricao_fisica_em_ingles?.join(",") || "Hello world";
-  const waifuResult = await waifuDiff.query(imgPrompt);
+  const waifuResult = await waifuDiff.query(imgPrompt, 'character');
 
   const personagemParams = {
     nome: jsonResult.nome?.toString() || "Nome do personagem",
@@ -47,7 +52,7 @@ PersonagemRouter.post('/', async (req, res) => {
     backstory: jsonResult.backstory?.toString() || "Backstory do personagem",
     especie: jsonResult.especie?.toString() || "Espécie do personagem",
     personalidade: jsonResult.personalidade?.join(",") || "Personalidade do personagem",
-    prompt: prompt,
+    prompt: initialPrompt,
     imgPrompt: imgPrompt,
     id_historia: req.body.id_historia
   };

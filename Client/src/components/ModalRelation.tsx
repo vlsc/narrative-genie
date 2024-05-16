@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Button,
   Flex,
-  Image,
-  GridItem,
-  Grid,
   Text,
-  Textarea,
-  Tag,
   Input,
   useToast,
   Modal,
@@ -21,14 +16,11 @@ import {
   MenuList,
   MenuItem,
   Spacer,
-  useDisclosure,
 } from "@chakra-ui/react";
-import { HiPencilAlt, HiOutlineChevronDown } from "react-icons/hi";
+import { HiOutlineChevronDown } from "react-icons/hi";
 import { useParams } from "react-router-dom";
 
 import api from "../config/api";
-import environment from "../config/environment";
-import Header from "../layout/Header";
 
 export type RelationParams = {
   id_elem_narr: number | null;
@@ -47,6 +39,7 @@ interface ModalRelationProps {
   index: number | null;
   value: RelationParams;
   isOpen: boolean;
+  related: any;
   onClose: (saved: boolean, value?: RelationParams) => void;
 };
 
@@ -62,6 +55,9 @@ const ModalRelation: React.FC<ModalRelationProps> = ({ isOpen, onClose, ...param
   });
   const [prompt, setPrompt] = useState("");
   const [options, setOptions] = useState<any[]>([]);
+  const [descricao, setDescricao] = useState(value.descricao);
+  
+  const atualizar = value.descricao ? true : false;
 
   useEffect(() => {
     api
@@ -69,7 +65,8 @@ const ModalRelation: React.FC<ModalRelationProps> = ({ isOpen, onClose, ...param
       .then((res) => {
         const key = Object.keys(res.data)[0]; 
         setOptions(
-          res.data[key].filter((item: any) => item.id_elem_narr !== parseInt(elementId || "")).map((item: any) => ({
+          res.data[key].filter((item: any) => item.id_elem_narr !== parseInt(elementId || "") && !params.related.includes(item.id_elem_narr)
+          ).map((item: any) => ({
             value: item.id_elem_narr,
             label: item.nome,
           })) || []
@@ -101,32 +98,77 @@ const ModalRelation: React.FC<ModalRelationProps> = ({ isOpen, onClose, ...param
 
     setLoading(true);
 
-    try {
-      const res = await api.get("/relacao/descricao", { params: {
-        categoria_1: params.elemCategory,
-        nome_1: params.elemName,
-        categoria_2: params.type,
-        nome_2: value.label,
-        prompt: prompt,
-      } });
+    if(atualizar){
+      try {
+        const res = await api.put(`/relacao/${elementId}/${value.id_elem_narr}`, { 
+          descricao: descricao
+        } );
+
+        const valueWithDescription = {
+          ...value,
+          descricao: res.data.relacao.descricao,
+        };
+
+        setDescricao(res.data.relacao.descricao);
+        onClose(true, valueWithDescription);
+      } catch (e) {
+        try {
+          const res = await api.get("/relacao/descricao", { params: {
+            prompt: prompt,
+            descricao: descricao
+          } });
+        
+          const valueWithDescription = {
+            ...value,
+            prompt: res.data.prompt || prompt,
+            descricao: res.data.result || prompt,
+          };
+      
+          onClose(true, valueWithDescription);
+        } catch (e) {
+          toast({
+            title: "Erro na geração da descrição",
+            description: "Tente novamente mais tarde",
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+
+    } else {
+      try {
+        const res = await api.get("/relacao/descricao", { params: {
+          categoria_1: params.elemCategory,
+          nome_1: params.elemName,
+          categoria_2: params.type,
+          nome_2: value.label,
+          prompt: prompt,
+          id_historia: params.storyId,
+          c1_id: elementId,
+          c2_id: value.id_elem_narr,
+        } });
+      
+        const valueWithDescription = {
+          ...value,
+          prompt: res.data.prompt || prompt,
+          descricao: res.data.result || prompt,
+        };
     
-      const valueWithDescription = {
-        ...value,
-        prompt: res.data.prompt || prompt,
-        descricao: res.data.result || prompt,
-      };
-  
-      onClose(true, valueWithDescription);
-    } catch (e) {
-      toast({
-        title: "Erro na geração da descrição",
-        description: "Tente novamente mais tarde",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
+        onClose(true, valueWithDescription);
+      } catch (e) {
+        toast({
+          title: "Erro na geração da descrição",
+          description: "Tente novamente mais tarde",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -182,8 +224,8 @@ const ModalRelation: React.FC<ModalRelationProps> = ({ isOpen, onClose, ...param
               ml="2"
               w="full"
               borderRadius="xl"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              value={atualizar ? descricao : prompt}
+              onChange={(e) => { atualizar ? setDescricao(e.target.value) : setPrompt(e.target.value)}}
             />
           </Flex>
           <Flex w="full" my="16px">

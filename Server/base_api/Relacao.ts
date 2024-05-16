@@ -2,6 +2,10 @@ import * as express from 'express';
 import db from '../config/db';
 import { relacaoPrompt } from '../helpers/prompt';
 import chatGPT from '../external/chatgpt';
+import { buscarHistoria } from '../controllers/Historia';
+import { buscarPersonagem } from '../controllers/Personagem';
+import { buscarLugar } from '../controllers/Lugar';
+import { buscarOutro } from '../controllers/Outro';
 const RelacoesRouter = express.Router();
 
 RelacoesRouter.post('/', async (req, res) => {
@@ -9,16 +13,51 @@ RelacoesRouter.post('/', async (req, res) => {
 });
 
 RelacoesRouter.get('/descricao', async (req, res) => {
-  const prompt = relacaoPrompt(
-    req.query['categoria_1']?.toString() || "personagem",
-    req.query['nome_1']?.toString() || "Nome",
-    req.query['categoria_2']?.toString() || "personagem",
-    req.query['nome_2']?.toString() || "Nome",
-    req.query['prompt']?.toString() || "relacionamento entre personagens",
-  );
+    if(req.query['descricao']){
+        return res.json({ result: req.query['descricao'], prompt: req.query['prompt'] });
+    }
 
-  const gptResult = await chatGPT.completion(prompt);
-  res.json({ result: gptResult.data.choices[0].message?.content.toString() || "Descrição da relação", prompt: prompt });
+    const settingTable = async (category: string, id: number) => {
+        switch(category){
+            case 'personagem':
+                const personagem = await buscarPersonagem(id);
+                return personagem?.backstory;
+            case 'lugar':
+                const lugar = await buscarLugar(id);
+                return lugar?.descricao;
+            case 'objeto':
+                const objeto = await buscarOutro(id);
+                return objeto?.descricao;
+            default:
+                //
+                break;
+        }
+    }
+
+    const story = await buscarHistoria(parseInt(req.query['id_historia']?.toString() || ""));
+    const contexto = story?.descricao
+
+    const category1 = req.query['categoria_1']?.toString() || "personagem";
+    const category2 = req.query['categoria_2']?.toString() || "personagem";
+    const c1_id = parseInt(req.query['c1_id']?.toString() || "")
+    const c2_id = parseInt(req.query['c2_id']?.toString() || "")
+
+	const c1_backstory = settingTable(category1, c1_id)
+    const c2_backstory = settingTable(category2, c2_id)
+
+    const prompt = relacaoPrompt(
+        category1,
+        req.query['nome_1']?.toString() || "Nome",
+        category2,
+        req.query['nome_2']?.toString() || "Nome",
+        req.query['prompt']?.toString() || "relacionamento entre personagens",
+        contexto?.toString(),
+            c1_backstory?.toString(),
+            c2_backstory?.toString(),
+    );
+
+    const gptResult = await chatGPT.completion(prompt);
+    res.json({ result: gptResult.data.choices[0].message?.content.toString() || "Descrição da relação", prompt: req.query['prompt'] });
 });
 
 RelacoesRouter.put('/', async (req, res) => {
@@ -128,7 +167,6 @@ RelacoesRouter.put('/:idElemNarrativo1/:idElemNarrativo2', async (req, res) => {
             }
         },
         data: {
-            nome_relacao: req.body.nome_relacao || "",
             descricao: req.body.descricao || "",
         }
     });
