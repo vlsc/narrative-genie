@@ -50,7 +50,7 @@ const CategoriesList: React.FC<CategoriesListProps> = ({ items, category, onDele
               margin="auto"
               objectFit="cover"
               borderRadius="full"
-              src={environment.API_URL + item.imagem}
+              src={environment.API_URL + item.imagens[item.imagens.length-1]}
               alt="Imagem"
               fallbackSrc="https://demofree.sirv.com/nope-not-here.jpg"
             />

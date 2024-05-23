@@ -10,13 +10,17 @@ import {
   Textarea,
   Input,
   useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { HiPencilAlt } from "react-icons/hi";
+import { IoReloadCircleOutline, IoArrowBackCircleOutline, IoArrowForwardCircleOutline, IoTrash } from "react-icons/io5";
 import { useParams } from "react-router-dom";
 
 import api from "../config/api";
 import environment from "../config/environment";
 import { WorldParams } from "../pages/Description";
+import  ModalImagePrompt from "./ModalImagePrompt";
+import ModalDeleteImage from "./ModalDeleteImage";
 
 interface DescriptionCardProps {
   world: WorldParams;
@@ -32,6 +36,24 @@ const DescriptionCard: React.FC<DescriptionCardProps> = ({ world, worldTitle }) 
   const [backup, setBackup] = useState("");
   const [backupTitle, setBackupTitle] = useState("");
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [index, setIndex] = useState(world.paths_img_capa.length-1 || 0);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    type: "",
+    title: "",
+    index: null,
+    value: {
+      id_elem_narr: null,
+      label: "",
+      descricao: "",
+      prompt: ""
+    }
+  });
+
+  const openModal = () => {
+    onOpen();
+  }
 
   const handleInputChange = (e: any) => {
     const inputValue = e.target.value;
@@ -78,8 +100,25 @@ const DescriptionCard: React.FC<DescriptionCardProps> = ({ world, worldTitle }) 
     });
   };
 
+  const closeModal = (saved: boolean, value?: any) => {
+    onClose();
+  };
+
   return (
     <>
+    {isOpen && (<ModalImagePrompt
+        isOpen
+        onClose={closeModal}
+        path={"historia"}
+        index={modalConfig.index}
+      />)}
+      {openDeleteModal && (<ModalDeleteImage
+        isOpen
+        onClose={setOpenDeleteModal}
+        path={"historia"}
+        img_path={world.paths_img_capa[index]}
+      />)}
+
       <Flex
         direction={"column"}
         h="fit-content"
@@ -155,10 +194,38 @@ const DescriptionCard: React.FC<DescriptionCardProps> = ({ world, worldTitle }) 
                   alignSelf="auto"
                   objectFit="cover"
                   borderRadius="2xl"
-                  src={environment.API_URL + world?.path_img_capa}
+                  src={environment.API_URL + world?.paths_img_capa[index]}
                   alt="Imagem do mundo"
                   fallbackSrc="https://demofree.sirv.com/nope-not-here.jpg"
                 />
+                <Flex justify={'space-between'} marginTop={1}>
+                  <Flex>
+                    <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} 
+                      bg="none" 
+                      size="small"
+                      onClick={() => {index > 0 ? setIndex(index-1) : setIndex(index)}}
+                      isDisabled={index == 0}
+                    >
+                      <IoArrowBackCircleOutline color="white" size={25} />
+                    </Button>
+                    <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}}
+                      bg="none"
+                      size="small"
+                      onClick={() => {index !== (world.paths_img_capa.length-1) ? setIndex(index+1) : setIndex(index)}}
+                      isDisabled={index == world.paths_img_capa.length-1}
+                    >
+                      <IoArrowForwardCircleOutline color="white" size={25} />
+                    </Button>
+                  </Flex>
+                  <Flex>
+                    <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small" onClick={() => openModal()}>
+                      <IoReloadCircleOutline color="white" size={25} />
+                    </Button>
+                    <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small" onClick={() => setOpenDeleteModal(true)}>
+                      <IoTrash color="rgba(140,0,0)" size={20} />
+                    </Button>
+                  </Flex>
+                </Flex>
               </GridItem>
               <GridItem
                 pl="2"

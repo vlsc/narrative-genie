@@ -39,8 +39,6 @@ const Login: React.FC = () => {
       .post(`/auth/`, { email: email, password: password })
       .then((res) => {
         localStorage.setItem("email", res.data.email);
-        console.log('entrou no login')
-        console.log(localStorage.getItem("email"))
         if(pathname != '/login') {
           window.location.reload();
         }

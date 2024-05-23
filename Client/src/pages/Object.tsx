@@ -22,6 +22,9 @@ import environment from "../config/environment";
 import Header from "../layout/Header";
 import ModalList from "../components/ModalList";
 import ModalRelation, { RelationParams } from "../components/ModalRelation";
+import ModalImagePrompt from "../components/ModalImagePrompt";
+import ModalDeleteImage from "../components/ModalDeleteImage";
+import { IoArrowBackCircleOutline, IoArrowForwardCircleOutline, IoReloadCircleOutline, IoTrash } from "react-icons/io5";
 
 type RelatedParams = {
   personagens: RelationParams[],
@@ -33,7 +36,7 @@ type ObjectParams = {
   id_elem_narr: number;
   nome: string;
   descricao: string;
-  imagem: string;
+  imagens: string[];
   elemento_narrativo: {
     historia: {
       id_historia: number;
@@ -87,6 +90,8 @@ const ObjectPage: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isOpenList, onOpen: onOpenList, onClose: onCloseList } = useDisclosure();
   const toast = useToast();
+  const [imgIndex, setImgIndex] = useState(0);
+  const [length, setImgLength] = useState(0);
 
   useEffect(() => {
     api
@@ -95,6 +100,9 @@ const ObjectPage: React.FC = () => {
         setObj(res.data.other);
         setValue(res.data.other.descricao);
         setTitleValue(res.data.other.nome);
+        const length = res.data.other.imagens.length-1
+        setImgIndex(length)
+        setImgLength(length);
 
         const elemento_narrativo = res.data.other.elemento_narrativo;
   
@@ -296,9 +304,28 @@ const ObjectPage: React.FC = () => {
 
   const story = obj?.elemento_narrativo.historia;
   const relatedIds = related.personagens.map( p => p.id_elem_narr).concat(related.lugares.map( p => p.id_elem_narr), related.objetos.map( p => p.id_elem_narr))
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const [openImgModal, setOpenImgModal] = useState(false);
+
+  const closeImageModal = () => {
+    setOpenImgModal(false);
+  }
 
   return (
     <>
+      {openImgModal && (<ModalImagePrompt
+        isOpen
+        onClose={closeImageModal}
+        path={"outro"}
+        index={modalConfig.index}
+      />)}
+      {openDeleteModal && (<ModalDeleteImage
+        isOpen
+        onClose={setOpenDeleteModal}
+        path={"outro"}
+        img_path={obj?.imagens[imgIndex]}
+      />)}
       {isOpen && (<ModalRelation
         isOpen
         onClose={closeModal}
@@ -412,10 +439,38 @@ const ObjectPage: React.FC = () => {
               alignSelf="auto"
               objectFit="cover"
               borderRadius="2xl"
-              src={environment.API_URL + obj?.imagem}
+              src={environment.API_URL + obj?.imagens[imgIndex]}
               alt="Lugar"
               fallbackSrc="https://demofree.sirv.com/nope-not-here.jpg"
             />
+            <Flex justify={'space-between'} marginTop={1}>
+              <Flex>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} 
+                  bg="none" 
+                  size="small"
+                  onClick={() => {imgIndex > 0 ? setImgIndex(imgIndex-1) : setImgIndex(imgIndex)}}
+                  isDisabled={imgIndex === 0}
+                >
+                  <IoArrowBackCircleOutline color="white" size={25} />
+                </Button>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}}
+                  bg="none"
+                  size="small"
+                  onClick={() => {imgIndex < length ? setImgIndex(imgIndex+1) : setImgIndex(imgIndex)}}
+                  isDisabled={imgIndex === length}
+                >
+                  <IoArrowForwardCircleOutline color="white" size={25} />
+                </Button>
+              </Flex>
+              <Flex>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small">
+                  <IoReloadCircleOutline color="white" size={25} onClick={() => setOpenImgModal(true)} />
+                </Button>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small" onClick={() => setOpenDeleteModal(true)} >
+                  <IoTrash color="rgba(140,0,0)" size={20} />
+                </Button>
+              </Flex>
+            </Flex>
           </GridItem>
           <GridItem
             area={"footer"}

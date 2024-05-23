@@ -22,13 +22,16 @@ import environment from "../config/environment";
 import Header from "../layout/Header";
 import ModalList from "../components/ModalList";
 import ModalRelation, { RelationParams } from "../components/ModalRelation";
+import { IoArrowBackCircleOutline, IoArrowForwardCircleOutline, IoReloadCircleOutline, IoTrash } from "react-icons/io5";
+import ModalImagePrompt from "../components/ModalImagePrompt";
+import ModalDeleteImage from "../components/ModalDeleteImage";
 
 type RelatedParams = {
   personagens: RelationParams[],
   lugares: RelationParams[],
   objetos: RelationParams[],
   personalidade: string[],
-  caracteristicas: string[],
+  //caracteristicas: string[],
 };
 
 type CharacterParams = {
@@ -38,7 +41,7 @@ type CharacterParams = {
   backstory: string;
   personalidade: string;
   especie: string;
-  imagem: string;
+  imagens: string[];
   elemento_narrativo: {
     historia: {
       id_historia: number;
@@ -65,7 +68,7 @@ const Character: React.FC = () => {
     lugares: [],
     objetos: [],
     personalidade: [],
-    caracteristicas: [],
+    //caracteristicas: [],
   });
   const [backup, setBackup] = useState("");
   const [backupTitle, setBackupTitle] = useState("");
@@ -74,7 +77,7 @@ const Character: React.FC = () => {
     lugares: [],
     objetos: [],
     personalidade: [],
-    caracteristicas: [],
+    //caracteristicas: [],
   });
   const [modalConfig, setModalConfig] = useState({
     type: "",
@@ -96,12 +99,17 @@ const Character: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isOpenList, onOpen: onOpenList, onClose: onCloseList } = useDisclosure();
   const toast = useToast();
+  const [imgIndex, setImgIndex] = useState(0);
+  const [length, setImgLength] = useState(0);
 
   useEffect(() => {
     api.get(`/personagem/${id}`).then((res) => {
       setCharacter(res.data.character);
       setValue(res.data.character.backstory);
       setTitleValue(res.data.character.nome);
+      const length = res.data.character.imagens.length-1
+      setImgIndex(length)
+      setImgLength(length);
 
       const elemento_narrativo = res.data.character.elemento_narrativo;
 
@@ -165,7 +173,7 @@ const Character: React.FC = () => {
         lugares: [...lugares1, ...lugares2],
         objetos: [...objetos1, ...objetos2],
         personalidade: res.data.character.personalidade.split(","),
-        caracteristicas: res.data.character.descricao.split(","),
+        //caracteristicas: res.data.character.descricao.split(","),
       }));
       setLoading(false);
     }).catch(err => {
@@ -208,7 +216,7 @@ const Character: React.FC = () => {
       nome: titleValue,
       backstory: value,
       personalidade: related.personalidade.join(","),
-      descricao: related.caracteristicas.join(","),
+      //descricao: related.caracteristicas.join(","),
       personagens: related.personagens.map((personagem: any) => ({ ...personagem, nome_relacao: "Relação" })),
       lugares: related.lugares.map((personagem: any) => ({ ...personagem, nome_relacao: "Relação" })),
       objetos: related.objetos.map((objeto: any) => ({ ...objeto, nome_relacao: "Relação" })),
@@ -305,9 +313,29 @@ const Character: React.FC = () => {
 
   const story = character?.elemento_narrativo.historia;
   const relatedIds = related.personagens.map( p => p.id_elem_narr).concat(related.lugares.map( p => p.id_elem_narr), related.objetos.map( p => p.id_elem_narr))
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const [openImgModal, setOpenImgModal] = useState(false);
+
+  const closeImageModal = () => {
+    setOpenImgModal(false);
+  }
 
   return (
     <>
+      {openImgModal && (<ModalImagePrompt
+        isOpen
+        onClose={closeImageModal}
+        path={"personagem"}
+        index={modalConfig.index}
+      />)}
+      {openDeleteModal && (<ModalDeleteImage
+        isOpen
+        onClose={setOpenDeleteModal}
+        path={"personagem"}
+        img_path={character?.imagens[imgIndex]}
+      />)}
+
       {isOpen && (<ModalRelation
         isOpen
         onClose={closeModal}
@@ -419,10 +447,38 @@ const Character: React.FC = () => {
               alignSelf="auto"
               objectFit="cover"
               borderRadius="2xl"
-              src={environment.API_URL + character?.imagem}
+              src={environment.API_URL + character?.imagens[imgIndex]}
               alt="Lugar"
               fallbackSrc="https://demofree.sirv.com/nope-not-here.jpg"
             />
+            <Flex justify={'space-between'} marginTop={1}>
+              <Flex>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} 
+                  bg="none" 
+                  size="small"
+                  onClick={() => {imgIndex > 0 ? setImgIndex(imgIndex-1) : setImgIndex(imgIndex)}}
+                  isDisabled={imgIndex === 0}
+                >
+                  <IoArrowBackCircleOutline color="white" size={25} />
+                </Button>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}}
+                  bg="none"
+                  size="small"
+                  onClick={() => {imgIndex < length ? setImgIndex(imgIndex+1) : setImgIndex(imgIndex)}}
+                  isDisabled={imgIndex === length}
+                >
+                  <IoArrowForwardCircleOutline color="white" size={25} />
+                </Button>
+              </Flex>
+              <Flex>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small">
+                  <IoReloadCircleOutline color="white" size={25} onClick={() => setOpenImgModal(true)} />
+                </Button>
+                <Button _hover={{bg:'rgba(255, 255, 255, 0.3)'}} bg="none" size="small" onClick={() => setOpenDeleteModal(true)} >
+                  <IoTrash color="rgba(140,0,0)" size={20} />
+                </Button>
+              </Flex>
+            </Flex>
           </GridItem>
           <GridItem
             area={"footer"}
@@ -495,7 +551,7 @@ const Character: React.FC = () => {
                     color="orange.600"
                   >
                     <>
-                      {["personalidade", "caracteristicas"].includes(key) ? (
+                      {["personalidade"].includes(key) ? (
                         v
                       ) : (
                         <Tooltip hasArrow label={(v as RelationParams).descricao} placement="top">
@@ -510,7 +566,7 @@ const Character: React.FC = () => {
                             cursor="pointer"
                             _hover={{ color: "orange.700" }}
                             _active={{ color: "orange.800" }}
-                            onClick={() => ["personalidade", "caracteristicas"].includes(key) ? openModalList({
+                            onClick={() => ["personalidade"].includes(key) ? openModalList({
                               title: capitalize(key),
                               type: key,
                               index: i,
@@ -546,7 +602,7 @@ const Character: React.FC = () => {
                     cursor="pointer"
                     _hover={{ bg: "whiteAlpha.700" }}
                     _active={{ bg: "whiteAlpha.700" }}
-                    onClick={() => ["personalidade", "caracteristicas"].includes(key) ? openModalList({
+                    onClick={() => ["personalidade"].includes(key) ? openModalList({
                       title: capitalize(key),
                       type: key,
                       index: null,

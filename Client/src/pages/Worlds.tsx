@@ -29,7 +29,7 @@ type WorldParams = {
   id_historia: string;
   nome: string;
   descricao: string;
-  path_img_capa: string;
+  paths_img_capa: string[];
   email_escritor: string;
   created_at: any;
   updated_at: any;
@@ -252,7 +252,7 @@ const Worlds: React.FC = () => {
                   margin="auto"
                   objectFit="cover"
                   borderRadius="2xl"
-                  src={environment.API_URL + world.path_img_capa}
+                  src={environment.API_URL + world.paths_img_capa[world.paths_img_capa.length-1]}
                   alt="Imagem do mundo"
                   fallbackSrc="https://demofree.sirv.com/nope-not-here.jpg"
                 />

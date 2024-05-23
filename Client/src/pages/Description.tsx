@@ -15,7 +15,7 @@ export type CharacterParams = {
   backstory: string;
   personalidade: string;
   especie: string;
-  imagem: string;
+  imagens: string[];
   created_at: any;
   updated_at: any;
 };
@@ -24,7 +24,7 @@ export type ObjectParams = {
   id_elem_narr: number;
   nome: string;
   descricao: string;
-  imagem: string;
+  imagens: string[];
   created_at: any;
   updated_at: any;
 };
@@ -37,7 +37,7 @@ export type PlaceParams = {
   saude: number;
   seguranca: number;
   agua: number;
-  imagem: string;
+  imagens: string[];
   created_at: any;
   updated_at: any;
 };
@@ -57,7 +57,7 @@ export type WorldParams = {
   id_historia: number;
   nome: string;
   descricao: string;
-  path_img_capa: string;
+  paths_img_capa: string[];
   email_escritor: string;
   elemento_narrativo: NarrativeElementParams[];
   created_at: any;
