@@ -75,7 +75,7 @@ type LugarParams = {
 export const criarLugar = async (lugarParams: LugarParams) => {
   const lugar = await db.lugar.create({
     data: {
-      imagem: lugarParams.imagem,
+      imagens: [lugarParams.imagem],
       nome: lugarParams.nome,
       descricao: lugarParams.descricao,
       riqueza: lugarParams.riqueza,
@@ -131,13 +131,97 @@ type AtualizarLugarParams = {
   }[];
 }
 
+type AdicionarImagemParams = {
+  id: number;
+  imagem?: string;
+  imgPrompt?: string;
+}
+
+export const adicionarImagem = async (imageParams: AdicionarImagemParams) => {
+  const lugar = await db.lugar.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (lugar?.imagens) {
+    try {
+      imagesArray = JSON.parse(lugar?.imagens.toString());
+    } catch (e) {
+      imagesArray = lugar.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = [...imagesArray, imageParams.imagem];
+
+  console.log('New images array:', newImagesArray);
+  console.log('New prompt:', imageParams.imgPrompt);
+
+  const newImage = await db.lugar.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+      imgPrompt: imageParams.imgPrompt?.toString()
+    }
+  });
+
+  return newImagesArray.length;
+};
+
+export const deletarImagem = async (imageParams: AdicionarImagemParams) => {
+  const lugar = await db.lugar.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (lugar?.imagens) {
+    try {
+      imagesArray = JSON.parse(lugar?.imagens.toString());
+    } catch (e) {
+      imagesArray = lugar.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = imagesArray.filter(image => image !== imageParams.imagem);
+
+  console.log('New images array:', newImagesArray);
+
+  const newImage = await db.lugar.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+    }
+  });
+
+  return newImage;
+};
+
 export const atualizarLugar = async (lugarParams: AtualizarLugarParams) => {
   await db.lugar.update({
     where: {
       id_elem_narr: lugarParams.id_elem_narr
     },
     data: {
-      imagem: lugarParams.imagem,
+      imagens: lugarParams.imagem,
       nome: lugarParams.nome,
       descricao: lugarParams.descricao,
       riqueza: lugarParams.riqueza,

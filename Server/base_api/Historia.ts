@@ -4,8 +4,8 @@ import * as express from 'express';
 
 import chatGPT from '../external/chatgpt';
 import waifuDiff from '../external/waifudiffusion';
-import { listarHistorias, buscarHistoria, criarHistoria, apagarHistoria, atualizarHistoria } from '../controllers/Historia';
-import { historiaPrompt } from '../helpers/prompt';
+import { listarHistorias, buscarHistoria, criarHistoria, apagarHistoria, atualizarHistoria, adicionarImagem, deletarImagem } from '../controllers/Historia';
+import { historiaPrompt, newImagePrompt } from '../helpers/prompt';
 
 const HistoriaRouter = express.Router();
 
@@ -20,10 +20,54 @@ HistoriaRouter.post('/gpt/', async (req, res) => {
   res.json({ result: gptResult.data });
 });
 
-HistoriaRouter.get('/waifu/', async (req, res) => {
-  const result = await waifuDiff.query(req.query.prompt?.toString() || "Hello world");
-  
-  res.json({ result });
+HistoriaRouter.delete('/waifu/:id', async (req, res) => {
+  const historiaParams = {
+    id_historia: parseInt(req.params.id),
+    path_img_capa: req.body.img_path,
+  };
+
+  const newHistoria = await deletarImagem(historiaParams);
+
+  if(newHistoria){
+    res.json({newHistoria})
+  } else {
+    res.status(404).json({ message: 'erro ao deletar imagem' });
+  }
+});
+
+HistoriaRouter.patch('/waifu/', async (req, res) => {
+  let firstPrompt;
+  let prompt;
+
+  if(!req.body.descricao){
+    const story = await buscarHistoria(parseInt(req.body.id));
+    firstPrompt = story?.imgPrompt;
+
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world");
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  } else{
+    firstPrompt = req.body.descricao.toString();
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world");
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  }
+
+  const result = await waifuDiff.query(`world ${prompt}` || "Hello world");
+
+  const historiaParams = {
+    id_historia: parseInt(req.body.id),
+    path_img_capa: result,
+    imgPrompt: prompt
+  };
+
+  const newHistoria = await adicionarImagem(historiaParams)
+
+  if(newHistoria){
+    res.json({newHistoria})
+  } else {
+    res.status(400).json({ message: 'erro ao gerar imagem' })
+  }
 });
 
 HistoriaRouter.get('/:id', async (req, res) => {

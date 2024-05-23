@@ -54,7 +54,7 @@ export const criarHistoria = async (historiaParams: HistoriaParams) => {
     data: {
       nome: historiaParams.nome,
       descricao: historiaParams.descricao,
-      path_img_capa: historiaParams.path_img_capa,
+      paths_img_capa: [historiaParams.path_img_capa],
       prompt: historiaParams.prompt,
       imgPrompt: historiaParams.imgPrompt,
       conta: {
@@ -89,4 +89,88 @@ export const atualizarHistoria = async (historiaParams: AtualizarHistoriaParams)
   });
 
   return historia;
+};
+
+type AdicionarImagemParams = {
+  id_historia: number;
+  path_img_capa?: string;
+  imgPrompt?: string;
+}
+
+export const adicionarImagem = async (historiaParams: AdicionarImagemParams) => {
+  const historia = await db.historia.findUnique({
+    where: {
+      id_historia: historiaParams.id_historia
+    }
+  })
+
+  let imagesArray;
+  if (historia?.paths_img_capa) {
+    try {
+      imagesArray = JSON.parse(historia?.paths_img_capa.toString());
+    } catch (e) {
+      imagesArray = historia.paths_img_capa;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = [...imagesArray, historiaParams.path_img_capa];
+
+  console.log('New images array:', newImagesArray);
+  console.log('New prompt:', historiaParams.imgPrompt);
+
+  const newHistoria = await db.historia.update({
+    where: {
+      id_historia: historiaParams.id_historia
+    },
+    data: {
+      paths_img_capa: newImagesArray,
+      imgPrompt: historiaParams.imgPrompt?.toString()
+    }
+  });
+
+  return newImagesArray.length;
+};
+
+export const deletarImagem = async (historiaParams: AdicionarImagemParams) => {
+  const historia = await db.historia.findUnique({
+    where: {
+      id_historia: historiaParams.id_historia
+    }
+  })
+
+  let imagesArray;
+  if (historia?.paths_img_capa) {
+    try {
+      imagesArray = JSON.parse(historia?.paths_img_capa.toString());
+    } catch (e) {
+      imagesArray = historia.paths_img_capa;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = imagesArray.filter(image => image !== historiaParams.path_img_capa);
+
+  console.log('New images array:', newImagesArray);
+
+  const newHistoria = await db.historia.update({
+    where: {
+      id_historia: historiaParams.id_historia
+    },
+    data: {
+      paths_img_capa: newImagesArray,
+    }
+  });
+
+  return newHistoria;
 };

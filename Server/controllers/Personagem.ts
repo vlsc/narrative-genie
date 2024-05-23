@@ -74,7 +74,7 @@ type PersonagemParams = {
 export const criarPersonagem = async (personagemParams: PersonagemParams) => {
   const personagem = await db.personagem.create({
     data: {
-      imagem: personagemParams.imagem,
+      imagens: [personagemParams.imagem],
       nome: personagemParams.nome,
       descricao: personagemParams.descricao,
       backstory: personagemParams.backstory,
@@ -128,13 +128,97 @@ type AtualizarPersonagemParams = {
   }[];
 }
 
+type AdicionarImagemParams = {
+  id: number;
+  imagem?: string;
+  imgPrompt?: string;
+}
+
+export const adicionarImagem = async (imageParams: AdicionarImagemParams) => {
+  const personagem = await db.personagem.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (personagem?.imagens) {
+    try {
+      imagesArray = JSON.parse(personagem?.imagens.toString());
+    } catch (e) {
+      imagesArray = personagem.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = [...imagesArray, imageParams.imagem];
+
+  console.log('New images array:', newImagesArray);
+  console.log('New prompt:', imageParams.imgPrompt);
+
+  const newImage = await db.personagem.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+      imgPrompt: imageParams.imgPrompt?.toString()
+    }
+  });
+
+  return newImagesArray.length;
+};
+
+export const deletarImagem = async (imageParams: AdicionarImagemParams) => {
+  const personagem = await db.personagem.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (personagem?.imagens) {
+    try {
+      imagesArray = JSON.parse(personagem?.imagens.toString());
+    } catch (e) {
+      imagesArray = personagem.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = imagesArray.filter(image => image !== imageParams.imagem);
+
+  console.log('New images array:', newImagesArray);
+
+  const newImage = await db.personagem.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+    }
+  });
+
+  return newImage;
+};
+
 export const atualizarPersonagem = async (personagemParams: AtualizarPersonagemParams) => {
   await db.personagem.update({
     where: {
       id_elem_narr: personagemParams.id_elem_narr
     },
     data: {
-      imagem: personagemParams.imagem,
+      imagens: personagemParams.imagem,
       nome: personagemParams.nome,
       descricao: personagemParams.descricao,
       backstory: personagemParams.backstory,

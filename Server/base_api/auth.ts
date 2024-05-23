@@ -7,7 +7,6 @@ import * as bcrypt from 'bcrypt';
 const saltRounds = 7;
 
 authRouter.post('/', async (req, res) => {
-  console.log('entrou no auth')
   let user = null;
 
   await db.$connect()
@@ -19,11 +18,9 @@ authRouter.post('/', async (req, res) => {
 
   let senha = "";
   if(user && user.senha) senha = user.senha;
-  console.log({senha})
 
   let password = ""
   if(req.body.password) password = req.body.password
-  console.log({password})
 
   let match = false
   
@@ -34,7 +31,6 @@ authRouter.post('/', async (req, res) => {
     match = bcrypt.compareSync(password, senha);
   }
 
-  console.log({match})
   if(match){
     res.status(200).json({email: req.body.email, password: req.body.password});
   }
@@ -46,8 +42,6 @@ authRouter.post('/', async (req, res) => {
 });
 
 authRouter.post('/register/', async (req, res) => {
-  
-  console.log(req.body)
   await db.$connect();
   
   const hash = await bcrypt.hash(req.body.password, saltRounds);
@@ -79,19 +73,13 @@ authRouter.post('/register/', async (req, res) => {
 });
 
 authRouter.put('/update/', async (req, res) => {
-  console.log('ENTROU NO UPDATE ATENCAO')
-  console.log(req.body)
   const email = req.body.email?.toString() || "";
   const password = req.body.password?.toString() || "";
 
-  console.log('ve se a senha chego', req.body)
   await db.$connect();
-  
-  const hash = await bcrypt.hash(password, saltRounds);
-console.log({hash})
-  const conta = await atualizarSenha(email, hash);
 
-  console.log({conta})
+  const hash = await bcrypt.hash(password, saltRounds);
+  const conta = await atualizarSenha(email, hash);
 
   if(conta.count){
     res.json({message: 'Senha atualizada com sucesso'})

@@ -7,6 +7,17 @@ export const historiaPrompt = (prompt: string) => {
   return result;
 };
 
+export const newImagePrompt = (prompt: string, storyPrompt?: string) => {
+  let result;
+  if(storyPrompt){
+    result = `generate a prompt to create a image described by "${prompt.trim()}" in the context of "${storyPrompt.trim()}". Add all possible details, at least 8 words to describe it. It have to be in english`
+  } else {
+    result = `generate a prompt to create a image described by "${prompt.trim()}". Add all possible details, at least 8 words to describe it. It have to be in english`
+  }
+
+  return result;
+};
+
 export const lugarPrompt = (prompt: string, contexto: string) => {
   let result = `fill the json with data about a fictional place described by "${prompt.trim()}", that exists in the world of "${contexto}". 
   Add all possible details, the story, the culture, geographical characteristics, physical characteristics, give a deep description, 

@@ -4,11 +4,62 @@ import * as express from 'express';
 
 import chatGPT from '../external/chatgpt';
 import waifuDiff from '../external/waifudiffusion';
-import { apagarPersonagem, atualizarPersonagem, buscarPersonagem, criarPersonagem, listarPersonagens } from '../controllers/Personagem';
-import { personagemPrompt } from '../helpers/prompt';
+import { adicionarImagem, apagarPersonagem, atualizarPersonagem, buscarPersonagem, criarPersonagem, deletarImagem, listarPersonagens } from '../controllers/Personagem';
+import { newImagePrompt, personagemPrompt } from '../helpers/prompt';
 import { buscarHistoria } from '../controllers/Historia';
 
 const PersonagemRouter = express.Router();
+
+PersonagemRouter.delete('/waifu/:id', async (req, res) => {
+  const imageParams = {
+    id: parseInt(req.params.id),
+    imagem: req.body.img_path,
+  };
+
+  const newImage = await deletarImagem(imageParams);
+
+  if(newImage){
+    res.json({newImage})
+  } else {
+    res.status(404).json({ message: 'erro ao deletar imagem' });
+  }
+});
+
+PersonagemRouter.patch('/waifu/', async (req, res) => {
+  let firstPrompt;
+  let prompt;
+  const character = await buscarPersonagem(parseInt(req.body.id));
+  const historia = character?.elemento_narrativo.historia.descricao || ""
+
+  if(!req.body.descricao){
+    firstPrompt = character?.imgPrompt;
+
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world", historia);
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  } else{
+    firstPrompt = req.body.descricao.toString();
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world", historia);
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  }
+
+  const result = await waifuDiff.query(`character ${prompt}` || "Hello world");
+
+  const imageParams = {
+    id: parseInt(req.body.id),
+    imagem: result,
+    imgPrompt: prompt
+  };
+
+  const newImage = await adicionarImagem(imageParams)
+
+  if(newImage){
+    res.json({newImage})
+  } else {
+    res.status(400).json({ message: 'erro ao gerar imagem' })
+  }
+});
 
 PersonagemRouter.get('/', async (req, res) => {
   const characters = await listarPersonagens(parseInt(req.query.id_historia?.toString() || ""));
@@ -17,6 +68,7 @@ PersonagemRouter.get('/', async (req, res) => {
 
 PersonagemRouter.get('/:id', async (req, res) => {
   const character = await buscarPersonagem(parseInt(req.params.id));
+
   res.json({ character });
 });
 

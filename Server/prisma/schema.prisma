@@ -33,7 +33,7 @@ model historia {
   id_historia        Int                  @id               @default(autoincrement())
   nome               String?              @db.VarChar(255)
   descricao          String?              @db.VarChar(3000)
-  path_img_capa      String?              @db.VarChar(255)
+  paths_img_capa      Json
   email_escritor     String               @db.VarChar(255)
   prompt             String?              @db.VarChar(2000)
   imgPrompt          String?              @db.VarChar(2000)
@@ -49,7 +49,7 @@ model lugar {
   id_elem_narr       Int                @id
   nome               String?            @db.VarChar(255)
   descricao          String?            @db.VarChar(3000)
-  imagem             String?            @db.VarChar(255)
+  imagens            Json
   riqueza            Int                @default(0)
   saude              Int                @default(0)
   seguranca          Int                @default(0)
@@ -67,7 +67,7 @@ model outro {
   id_elem_narr Int                @id
   nome               String?      @db.VarChar(255)
   descricao          String?      @db.VarChar(3000)
-  imagem             String?      @db.VarChar(255)
+  imagens            Json
   prompt             String?      @db.VarChar(2000)
   imgPrompt          String?      @db.VarChar(2000)
   created_at         DateTime     @default(now())
@@ -84,7 +84,7 @@ model personagem {
   backstory          String?            @db.VarChar(2000)
   especie            String?            @db.VarChar(255)
   personalidade      String?            @db.VarChar(2000)
-  imagem             String?            @db.VarChar(255)
+  imagens            Json
   prompt             String?            @db.VarChar(2000)
   imgPrompt          String?            @db.VarChar(2000)
   created_at         DateTime           @default(now())

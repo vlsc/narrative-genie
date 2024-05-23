@@ -4,11 +4,61 @@ import * as express from 'express';
 
 import chatGPT from '../external/chatgpt';
 import waifuDiff from '../external/waifudiffusion';
-import { apagarLugar, atualizarLugar, buscarLugar, criarLugar, listarLugares } from '../controllers/Lugar';
-import { lugarPrompt } from '../helpers/prompt';
+import { adicionarImagem, apagarLugar, atualizarLugar, buscarLugar, criarLugar, deletarImagem, listarLugares } from '../controllers/Lugar';
+import { lugarPrompt, newImagePrompt } from '../helpers/prompt';
 import { buscarHistoria } from '../controllers/Historia';
 
 const LugarRouter = express.Router();
+
+LugarRouter.delete('/waifu/:id', async (req, res) => {
+  const imageParams = {
+    id: parseInt(req.params.id),
+    imagem: req.body.img_path,
+  };
+
+  const newImage = await deletarImagem(imageParams);
+
+  if(newImage){
+    res.json({newImage})
+  } else {
+    res.status(404).json({ message: 'erro ao deletar imagem' });
+  }
+});
+
+LugarRouter.patch('/waifu/', async (req, res) => {
+  let firstPrompt;
+  let prompt;
+  const place = await buscarLugar(parseInt(req.body.id));
+  const historia = place?.elemento_narrativo.historia.descricao || ""
+
+  if(!req.body.descricao){
+    firstPrompt = place?.imgPrompt;
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world", historia);
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  } else{
+    firstPrompt = req.body.descricao.toString();
+    const gptPrompt = newImagePrompt(firstPrompt || "Hello world", historia);
+    const gptResult = await chatGPT.completion(gptPrompt);
+    prompt = gptResult.data.choices[0].message?.content.toString();
+  }
+
+  const result = await waifuDiff.query(`place ${prompt}` || "Hello world");
+
+  const imageParams = {
+    id: parseInt(req.body.id),
+    imagem: result,
+    imgPrompt: prompt
+  };
+
+  const newImage = await adicionarImagem(imageParams)
+
+  if(newImage){
+    res.json({newImage})
+  } else {
+    res.status(400).json({ message: 'erro ao gerar imagem' })
+  }
+});
 
 LugarRouter.get('/', async (req, res) => {
   const places = await listarLugares(parseInt(req.query.id_historia?.toString() || ""));

@@ -71,7 +71,7 @@ type OutroParams = {
 export const criarOutro = async (outroParams: OutroParams) => {
   const outro = await db.outro.create({
     data: {
-      imagem: outroParams.imagem,
+      imagens: [outroParams.imagem],
       nome: outroParams.nome,
       descricao: outroParams.descricao,
       prompt: outroParams.prompt,
@@ -119,13 +119,97 @@ type AtualizarOutroParams = {
   }[];
 }
 
+type AdicionarImagemParams = {
+  id: number;
+  imagem?: string;
+  imgPrompt?: string;
+}
+
+export const adicionarImagem = async (imageParams: AdicionarImagemParams) => {
+  const outro = await db.outro.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (outro?.imagens) {
+    try {
+      imagesArray = JSON.parse(outro?.imagens.toString());
+    } catch (e) {
+      imagesArray = outro.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = [...imagesArray, imageParams.imagem];
+
+  console.log('New images array:', newImagesArray);
+  console.log('New prompt:', imageParams.imgPrompt);
+
+  const newImage = await db.outro.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+      imgPrompt: imageParams.imgPrompt?.toString()
+    }
+  });
+
+  return newImagesArray.length;
+};
+
+export const deletarImagem = async (imageParams: AdicionarImagemParams) => {
+  const outro = await db.outro.findUnique({
+    where: {
+      id_elem_narr: imageParams.id
+    }
+  })
+
+  let imagesArray;
+  if (outro?.imagens) {
+    try {
+      imagesArray = JSON.parse(outro?.imagens.toString());
+    } catch (e) {
+      imagesArray = outro.imagens;
+    }
+  } else {
+    imagesArray = [];
+  }
+
+  if (!Array.isArray(imagesArray)) {
+    imagesArray = [imagesArray];
+  }
+
+  const newImagesArray = imagesArray.filter(image => image !== imageParams.imagem);
+
+  console.log('New images array:', newImagesArray);
+
+  const newImage = await db.outro.update({
+    where: {
+      id_elem_narr: imageParams.id
+    },
+    data: {
+      imagens: newImagesArray,
+    }
+  });
+
+  return newImage;
+};
+
 export const atualizarOutro = async (outroParams: AtualizarOutroParams) => {
   await db.outro.update({
     where: {
       id_elem_narr: outroParams.id_elem_narr
     },
     data: {
-      imagem: outroParams.imagem,
+      imagens: outroParams.imagem,
       nome: outroParams.nome,
       descricao: outroParams.descricao,
       prompt: outroParams.prompt,

@@ -30,7 +30,7 @@ class WaifuDiff {
         this.updatePrompts("", ", landscape, wide view,")
         break;
       case "character":
-        this.updatePrompts("", ", full body, movement,")
+        this.updatePrompts("", "")
         break;
       default:
         //
