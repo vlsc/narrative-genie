@@ -10,7 +10,7 @@ export const historiaPrompt = (prompt: string) => {
 export const newImagePrompt = (prompt: string, storyPrompt?: string) => {
   let result;
   if(storyPrompt){
-    result = `generate a prompt to create a image described by "${prompt.trim()}" in the context of "${storyPrompt.trim()}". Add all possible details, at least 8 words to describe it. It have to be in english`
+    result = `generate a prompt to create a image described by "${prompt.trim()}" in the context of "${storyPrompt.trim()}". Add all possible details, at least 8 words to describe it, take in account the GENDER. It have to be in english`
   } else {
     result = `generate a prompt to create a image described by "${prompt.trim()}". Add all possible details, at least 8 words to describe it. It have to be in english`
   }
