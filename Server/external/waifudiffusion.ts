@@ -299,6 +299,7 @@ class WaifuDiff {
   }
 
   private async writeImage(response: AxiosResponse<any>, filename: string, filepath : string) : Promise<string> {
+    console.log('saving image')
     const writer = fs.createWriteStream(filepath);
     response.data.pipe(writer);
     
