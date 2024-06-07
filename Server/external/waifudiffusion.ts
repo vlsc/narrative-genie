@@ -300,6 +300,16 @@ class WaifuDiff {
 
   private async writeImage(response: AxiosResponse<any>, filename: string, filepath : string) : Promise<string> {
     console.log('saving image')
+    try {
+      const directory = path.dirname(filepath);
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+      }
+    }
+    catch(error) {
+      console.error('Error in writeImage function:', error);
+      throw error;
+    }
     const writer = fs.createWriteStream(filepath);
     response.data.pipe(writer);
     
