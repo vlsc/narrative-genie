@@ -25,6 +25,7 @@ import ModalRelation, { RelationParams } from "../components/ModalRelation";
 import { IoArrowBackCircleOutline, IoArrowForwardCircleOutline, IoReloadCircleOutline, IoTrash } from "react-icons/io5";
 import ModalImagePrompt from "../components/ModalImagePrompt";
 import ModalDeleteImage from "../components/ModalDeleteImage";
+import ElementHeader from "../components/ElementHeader";
 
 type RelatedParams = {
   personagens: RelationParams[],
@@ -358,6 +359,7 @@ const Character: React.FC = () => {
         value={listConfig.value}
       />)}
       <Header text={story?.nome || "Carregando..."} href={`/worlds/${story?.id_historia}`} />
+      <ElementHeader current="characters" worldId={character?.elemento_narrativo.historia.id_historia || 0} />
       <Flex
         direction={"column"}
         h="fit-content"

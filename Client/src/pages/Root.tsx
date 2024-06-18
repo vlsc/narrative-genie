@@ -9,6 +9,7 @@ import {
   MenuList,
   MenuItem,
   Image,
+  Textarea,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -200,7 +201,7 @@ const Root: React.FC = () => {
       </Modal>
       <Header />
       <Flex
-        w="60%"
+        w="55%"
         maxWidth={"1000px"}
         m="auto"
         px="6"
@@ -215,56 +216,59 @@ const Root: React.FC = () => {
         <Heading as="h1" color="white" fontWeight={"regular"}>
           O que vamos criar hoje?
         </Heading>
-        <Flex mt="4" mb="4" w="container.md" maxW="full">
-          <Menu>
-            <MenuButton
-              as={Button}
-              borderRadius="xl"
-              border="1px solid black"
-              w="25%"
-              fontWeight={"regular"}
-              rightIcon={
-                <HiOutlineChevronDown style={{ marginLeft: "30px" }} />
-              }
-            >
-              {category}
-            </MenuButton>
-            <MenuList>
-              {categories.map((category) => (
-                <MenuItem
-                  onClick={() => handleCategory(category.label)}
-                  key={category.path}
-                >
-                  {category.label}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-          <Input
+        <Flex mt="4" mb="4" w="90%" maxW="full" flexDirection="column" gap={1}>
+          <Textarea
             bg="white"
             border="1px solid black"
             color="black"
             placeholder="Digite o que você deseja criar..."
-            ml="2"
             w="full"
             borderRadius="xl"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           />
-          <Button
-            ml="2"
-            w="15%"
-            bg="black"
-            color="white"
-            _hover={{ bg: "#4e4a44" }}
-            _active={{ bg: "#4e4a44" }}
-            borderRadius="xl"
-            fontWeight={"regular"}
-            onClick={sendPrompt}
-            isLoading={isLoading}
-          >
-            Criar
-          </Button>
+          <Flex justifyContent="flex-end">
+            <Menu>
+              <MenuButton
+                as={Button}
+                borderRadius="xl"
+                border="1px solid black"
+                w="145px"
+                fontWeight={"regular"}
+                rightIcon={
+                  <HiOutlineChevronDown style={{ marginLeft: "30px" }} />
+                }
+              >
+                {category}
+              </MenuButton>
+              <MenuList>
+                {categories.map((category) => (
+                  <MenuItem
+                    onClick={() => handleCategory(category.label)}
+                    key={category.path}
+                  >
+                    {category.label}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+            <Button
+              ml="2"
+              w="15%"
+              bg="black"
+              color="white"
+              _hover={{ bg: "#4e4a44" }}
+              _active={{ bg: "#4e4a44" }}
+              borderRadius="xl"
+              fontWeight={"regular"}
+              onClick={sendPrompt}
+              isLoading={isLoading}
+            >
+              Criar
+            </Button>
+
+          </Flex>
+          
         </Flex>
       </Flex>
       <Image src={image} w="lg" marginX="auto" marginBottom="3" />

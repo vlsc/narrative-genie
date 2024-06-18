@@ -4,6 +4,7 @@ import {
   Flex,
   Text,
   Input,
+  Textarea,
   useToast,
   Modal,
   ModalOverlay,
@@ -216,12 +217,14 @@ const ModalRelation: React.FC<ModalRelationProps> = ({ isOpen, onClose, ...param
                 ))}
               </MenuList>
             </Menu>
-            <Input
+            <Textarea
               bg="white"
               border="1px solid black"
               color="black"
               placeholder="Dê uma descrição para a relação"
               ml="2"
+              size="sm"
+              minH="150px"
               w="full"
               borderRadius="xl"
               value={atualizar ? descricao : prompt}

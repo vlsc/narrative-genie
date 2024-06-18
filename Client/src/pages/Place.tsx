@@ -29,6 +29,7 @@ import ModalRelation, { RelationParams } from "../components/ModalRelation";
 import ModalDeleteImage from "../components/ModalDeleteImage";
 import ModalImagePrompt from "../components/ModalImagePrompt";
 import { IoArrowBackCircleOutline, IoArrowForwardCircleOutline, IoReloadCircleOutline, IoTrash } from "react-icons/io5";
+import ElementHeader from "../components/ElementHeader";
 
 type RelatedParams = {
   personagens: RelationParams[],
@@ -359,6 +360,7 @@ const Place: React.FC = () => {
         text={story?.nome || "Carregando..."}
         href={`/worlds/${story?.id_historia}`}
       />
+      <ElementHeader current="places" worldId={place?.elemento_narrativo.historia.id_historia || 0} />
       <Flex
         direction={"column"}
         h="fit-content"
@@ -392,7 +394,6 @@ const Place: React.FC = () => {
           templateAreas={`
                   "main main"
                   "nav footer"
-                  "tags tags"
                   "relations relations"`}
           gridTemplateRows={"1fr  auto 1fr 2fr"}
           gridTemplateColumns={"1fr 3fr"}
@@ -537,101 +538,6 @@ const Place: React.FC = () => {
                 />
               </>
             )}
-          </GridItem>
-          <GridItem
-            area={"tags"}
-            alignSelf="flex-start"
-            mt="2"
-            display={"flex"}
-          >
-            <Flex alignItems={"center"} mr="5">
-              <Text
-                color="white"
-                fontSize="xl"
-                w="fit-content"
-                bg="yellow.500"
-                borderRadius={"full"}
-                p="5px"
-              >
-                <TbMoneybag />
-              </Text>
-              {new Array(place?.riqueza || 0).fill(0).map((_, i) => (
-                <Box
-                  w="15px"
-                  key={i}
-                  h="15px"
-                  borderRadius="sm"
-                  bg="yellow.700"
-                  ml="3px"
-                ></Box>
-              ))}
-            </Flex>
-            <Flex alignItems={"center"} mr="5">
-              <Text
-                color="white"
-                fontSize="xl"
-                w="fit-content"
-                bg="red.500"
-                borderRadius={"full"}
-                p="5px"
-              >
-                <MdOutlineLocalHospital />
-              </Text>
-              {new Array(place?.saude || 0).fill(0).map((_, i) => (
-                <Box
-                  w="15px"
-                  key={i}
-                  h="15px"
-                  borderRadius="sm"
-                  bg="red.700"
-                  ml="3px"
-                ></Box>
-              ))}
-            </Flex>
-            <Flex alignItems={"center"} mr="5">
-              <Text
-                color="white"
-                fontSize="xl"
-                w="fit-content"
-                bg="green.500"
-                borderRadius={"full"}
-                p="5px"
-              >
-                <BsShieldShaded />
-              </Text>
-              {new Array(place?.seguranca || 0).fill(0).map((_, i) => (
-                <Box
-                  w="15px"
-                  key={i}
-                  h="15px"
-                  borderRadius="sm"
-                  bg="green.700"
-                  ml="3px"
-                ></Box>
-              ))}
-            </Flex>
-            <Flex alignItems={"center"} mr="5">
-              <Text
-                color="white"
-                fontSize="xl"
-                w="fit-content"
-                bg="blue.500"
-                borderRadius={"full"}
-                p="5px"
-              >
-                <MdOutlineWaterDrop />
-              </Text>
-              {new Array(place?.agua || 0).fill(0).map((_, i) => (
-                <Box
-                  w="15px"
-                  key={i}
-                  h="15px"
-                  borderRadius="sm"
-                  bg="blue.700"
-                  ml="3px"
-                ></Box>
-              ))}
-            </Flex>
           </GridItem>
           <GridItem area={"relations"} alignSelf="flex-start" mt="2">
           {Object.entries(related).map(([key, value]) => (

@@ -28,7 +28,7 @@ const WorldHeader: React.FC<ComponentHandlerProps> = ({
   searchString,
   classification,
 }) => {
-  const [tab, setTab] = React.useState("Des");
+  const [tab, setTab] = React.useState(current || "Des");
   const options = ["Nome", "Mais novo", "Mais antigo", "Última atualização"];
   const [option, setOption] = useState("Nome");
 
@@ -64,7 +64,7 @@ const WorldHeader: React.FC<ComponentHandlerProps> = ({
       py="1"
       bg="rgba(0,0,0,0.5)"
       align="center"
-      mx="20"
+      mx="16"
       style={{
         borderRadius: "30px",
         boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.8)",

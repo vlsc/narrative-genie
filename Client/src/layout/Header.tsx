@@ -85,42 +85,20 @@ const Header: React.FC<HeaderProps> = ({ text, href, user }) => {
         <a href={href ?? "/"}> {text ?? "Narrative Genie"} </a>
       </Heading>
       <Spacer />
-      <Text
-        color="white"
-        fontSize="xl"
-        fontFamily={"Fondamento"}
-        fontWeight="regular"
-        flexShrink={0}
-      >
-        {`Olá, ${user ? user : username}`}
-      </Text>
-
-      <Menu>
-        <MenuButton
-          as={IconButton}
-          ml="4"
-          aria-label="Menu"
-          icon={<RiMenuFill size="20px" />}
-          color="white"
-          bg="none"
-          _hover={{ color: "white", bg: "whiteAlpha.300" }}
-          _active={{ color: "white", bg: "whiteAlpha.300" }}
-        />
-        <MenuList>
-          <Link to="/">
-            <MenuItem>Início</MenuItem>
+      <Flex gap={1}>
+        <Link to="/">
+            <Button colorScheme="whiteAlpha" bg="none" borderRadius={"20px"}>Início</Button>
           </Link>
           <Link to="/profile">
-            <MenuItem>Perfil</MenuItem>
+            <Button colorScheme="whiteAlpha" bg="none" borderRadius={"20px"}>Perfil</Button>
           </Link>
           <Link to="/worlds">
-            <MenuItem>Mundos</MenuItem>
+            <Button colorScheme="whiteAlpha" bg="none" borderRadius={"20px"}>Mundos</Button>
           </Link>
-          <Button padding="0" bg="none" _hover={{color: "none"}} width="full" onClick={() => {localStorage.removeItem("email"); navigate('/login')}}>
-            <MenuItem>Sair</MenuItem>
+          <Button colorScheme="whiteAlpha" bg="none" borderRadius={"20px"} width="full" onClick={() => {localStorage.removeItem("email"); navigate('/login')}}>
+            Sair
           </Button>
-        </MenuList>
-      </Menu>
+      </Flex>
     </Flex>
   );
 };

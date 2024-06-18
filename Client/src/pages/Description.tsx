@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Flex, Spinner, useToast } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 import api from "../config/api";
 import DescriptionCard from "../components/DescriptionCard";
@@ -68,11 +68,15 @@ const Description: React.FC = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [world, setWorld] = useState<WorldParams | null>(null);
-  const [current, setCurrent] = useState("Des");
   const toast = useToast();
   const [searchValue, setSearchValue] = useState("");
   const [sort, setSort] = useState("");
   const [worldTitle, setWorldTitle] = useState("")
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tab = searchParams.get('tab');
+  const [current, setCurrent] = useState(tab || "Des");
 
   useEffect(() => {
     fetchWorld();

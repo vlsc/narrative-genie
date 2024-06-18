@@ -304,7 +304,7 @@ const Worlds: React.FC = () => {
                   textColor="white"
                   fontWeight="regular"
                   borderRadius="3xl"
-                  onClick={() => deleteWorld(world.id_historia)}
+                  onClick={() => { if(window.confirm("Tem certeza que deseja deletar?")) deleteWorld(world.id_historia) }}
                 >
                   Deletar
                 </Button>
