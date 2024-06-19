@@ -44,7 +44,7 @@ OutroRouter.patch('/waifu/', async (req, res) => {
     prompt = gptResult.data.choices[0].message?.content.toString();
   }
 
-  const result = await waifuDiff.query(`object ${prompt}` || "Hello world");
+  const result = await waifuDiff.query(`object ${prompt}` || "Hello world", 'object');
 
   const imageParams = {
     id: parseInt(req.body.id),

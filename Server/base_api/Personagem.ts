@@ -44,7 +44,7 @@ PersonagemRouter.patch('/waifu/', async (req, res) => {
     prompt = gptResult.data.choices[0].message?.content.toString();
   }
 
-  const result = await waifuDiff.query(`character ${prompt}` || "Hello world");
+  const result = await waifuDiff.query(`character ${prompt}` || "Hello world", 'character');
 
   const imageParams = {
     id: parseInt(req.body.id),

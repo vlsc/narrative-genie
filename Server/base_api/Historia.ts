@@ -53,7 +53,7 @@ HistoriaRouter.patch('/waifu/', async (req, res) => {
     prompt = gptResult.data.choices[0].message?.content.toString();
   }
 
-  const result = await waifuDiff.query(`world ${prompt}` || "Hello world");
+  const result = await waifuDiff.query(`world ${prompt}` || "Hello world", 'world');
 
   const historiaParams = {
     id_historia: parseInt(req.body.id),
@@ -102,13 +102,15 @@ HistoriaRouter.patch('/:id', async (req, res) => {
  * @param {string} titulo - Título da história
  */
 HistoriaRouter.post('/', async (req, res) => {
+  console.log('aqui')
   const prompt = historiaPrompt(req.body['prompt']?.toString() || "Hello world");
   const gptResult = await chatGPT.completion(prompt);
   const jsonResult = JSON.parse(gptResult.data.choices[0].message?.content.toString() || "");
   const imgPrompt = jsonResult.prompt_para_modelo_de_imagem_em_ingles?.toString() || "Hello world";
-  const waifuResult = await waifuDiff.query(imgPrompt);
+  console.log({imgPrompt})
+  const waifuResult = await waifuDiff.query(imgPrompt, 'world');
   const email = req.body["email"].toString();
-
+  console.log({jsonResult})
   const historiaParams = {
     nome: jsonResult.nome?.toString() || "Nome do mundo",
     descricao: jsonResult.descricao?.toString() || "Descrição do mundo",

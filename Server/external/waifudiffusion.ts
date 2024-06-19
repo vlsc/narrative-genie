@@ -7,14 +7,14 @@ import environment from "../config/environment";
 
 class WaifuDiff {
   static negativePrompt = ", nsfw, nude, text, sensual, deformed, disfigured, poor details, bad anatomy,"
-  static additionalPrompt = ", masterpiece, high quality, realistic"
+  static additionalPrompt = ", masterpiece, high quality,"
 
   updatePrompts(negative: string, additional: string){
     WaifuDiff.negativePrompt += negative;
     WaifuDiff.additionalPrompt += additional;
   }
 
-  public async query(prompt: string, type?: string) {
+  public async query(prompt: string, type: string) {
     const filename = `${uuidv4()}.jpg`;
     const filepath = path.resolve(__dirname, '..', 'images', filename);
     let data, pathResult;
@@ -39,56 +39,241 @@ class WaifuDiff {
 
     console.log('prompt final:', prompt + WaifuDiff.additionalPrompt);
 
-    try {
-      console.log('trying epic photo gasm')
-      data = await this.epiCPhotoGasm(prompt);
-      pathResult = await this.writeImage(data, filename, filepath);
-    } catch (err) {
-      console.log('not working');
+    if(type?.toString() === 'character'){
       try {
-        console.log('trying epic realism');
-        data = await this.epicRealism(prompt);
+        console.log('trying animagine')
+        data = await this.animagine(prompt);
         pathResult = await this.writeImage(data, filename, filepath);
       } catch (err) {
-          console.log('not working');
-        try { 
-          console.log('trying unstable diffusers')
-          data = await this.unstableDiffusersY(prompt);
+        console.log('not working');
+        try {
+          console.log('trying AAM XL AnimeMix')
+          data = await this.animeMix(prompt);
           pathResult = await this.writeImage(data, filename, filepath);
         } catch (err) {
           console.log('not working');
-          try { 
-            console.log('trying absolute reality')
-            data = await this.absoluteReality(prompt);
+          try {
+            console.log('trying majicMixFantasy')
+            data = await this.majicMixFantasy(prompt);
             pathResult = await this.writeImage(data, filename, filepath);
           } catch (err) {
             console.log('not working');
-            try { 
-              console.log('trying dreamshaper v7')
-              data = await this.dreamshaper_v7(prompt);
+            try {
+              console.log('trying animeMix turbo')
+              data = await this.animeMixTurbo(prompt);
               pathResult = await this.writeImage(data, filename, filepath);
             } catch (err) {
               console.log('not working');
-              try { 
-                console.log('trying animagine')
-                data = await this.animagine(prompt);
+              try {
+                console.log('trying epic photo gasm')
+                data = await this.epiCPhotoGasm(prompt);
                 pathResult = await this.writeImage(data, filename, filepath);
               } catch (err) {
                 console.log('not working');
+                try {
+                  console.log('trying epic realism');
+                  data = await this.epicRealism(prompt);
+                  pathResult = await this.writeImage(data, filename, filepath);
+                } catch (err) {
+                    console.log('not working');
+                  try { 
+                    console.log('trying majicMixFantasy')
+                    data = await this.majicMixFantasy(prompt);
+                    pathResult = await this.writeImage(data, filename, filepath);
+                  } catch (err) {
+                    console.log('not working');
+                    try { 
+                      console.log('trying absolute reality')
+                      data = await this.absoluteReality(prompt);
+                      pathResult = await this.writeImage(data, filename, filepath);
+                    } catch (err) {
+                      console.log('not working');
+                      try { 
+                        console.log('trying dreamshaper v7')
+                        data = await this.dreamshaper_v7(prompt);
+                        pathResult = await this.writeImage(data, filename, filepath);
+                      } catch (err) {
+                        console.log('not working');
+                        try { 
+                          console.log('trying animagine')
+                          data = await this.animagine(prompt);
+                          pathResult = await this.writeImage(data, filename, filepath);
+                        } catch (err) {
+                          console.log('not working');
+                          try {
+                            console.log('trying AAM XL AnimeMix')
+                            data = await this.animeMix(prompt);
+                            pathResult = await this.writeImage(data, filename, filepath);
+                          } catch (err) {
+                            console.log('not working');
+                            try {
+                              console.log('trying animeMix turbo')
+                              data = await this.animeMixTurbo(prompt);
+                              pathResult = await this.writeImage(data, filename, filepath);
+                            } catch (err) {
+                              console.log('not working');
+                              try { 
+                                console.log('trying local diffusion')
+                                data = await this.localDiffusion(prompt);
+                                pathResult = await this.writeImageBase64(data, filename, filepath);
+                              } catch (err) {
+                                console.log('not working');
+                                data = await this.waifuDiffusion(prompt);
+                                pathResult = await this.writeImage(data, filename, filepath); 
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      if(type?.toString() === 'object'){
+        try { 
+          console.log('trying AAM XL AnimeMix')
+          data = await this.animeMix(prompt);
+          pathResult = await this.writeImage(data, filename, filepath);
+        } catch (err) {
+          console.log('not working');
+          try {
+            console.log('trying animeMix turbo')
+            data = await this.animeMixTurbo(prompt);
+            pathResult = await this.writeImage(data, filename, filepath);
+          } catch (err) {
+            console.log('not working');
+            try {
+              console.log('trying epic photo gasm')
+              data = await this.epiCPhotoGasm(prompt);
+              pathResult = await this.writeImage(data, filename, filepath);
+            } catch (err) {
+              console.log('not working');
+              try {
+                console.log('trying epic realism');
+                data = await this.epicRealism(prompt);
+                pathResult = await this.writeImage(data, filename, filepath);
+              } catch (err) {
+                  console.log('not working');
                 try { 
-                  console.log('trying eerie')
-                  data = await this.eerieOrangeMix(prompt);
+                  console.log('trying majicMixFantasy')
+                  data = await this.majicMixFantasy(prompt);
                   pathResult = await this.writeImage(data, filename, filepath);
                 } catch (err) {
                   console.log('not working');
                   try { 
-                    console.log('trying local diffusion')
-                    data = await this.localDiffusion(prompt);
-                    pathResult = await this.writeImageBase64(data, filename, filepath);
+                    console.log('trying absolute reality')
+                    data = await this.absoluteReality(prompt);
+                    pathResult = await this.writeImage(data, filename, filepath);
                   } catch (err) {
                     console.log('not working');
-                    data = await this.waifuDiffusion(prompt);
+                    try { 
+                      console.log('trying dreamshaper v7')
+                      data = await this.dreamshaper_v7(prompt);
+                      pathResult = await this.writeImage(data, filename, filepath);
+                    } catch (err) {
+                      console.log('not working');
+                      try { 
+                        console.log('trying animagine')
+                        data = await this.animagine(prompt);
+                        pathResult = await this.writeImage(data, filename, filepath);
+                      } catch (err) {
+                        console.log('not working');
+                        try {
+                          console.log('trying AAM XL AnimeMix')
+                          data = await this.animeMix(prompt);
+                          pathResult = await this.writeImage(data, filename, filepath);
+                        } catch (err) {
+                          console.log('not working');
+                          try {
+                            console.log('trying animeMix turbo')
+                            data = await this.animeMixTurbo(prompt);
+                            pathResult = await this.writeImage(data, filename, filepath);
+                          } catch (err) {
+                            console.log('not working');
+                            try { 
+                              console.log('trying local diffusion')
+                              data = await this.localDiffusion(prompt);
+                              pathResult = await this.writeImageBase64(data, filename, filepath);
+                            } catch (err) {
+                              console.log('not working');
+                              data = await this.waifuDiffusion(prompt);
+                              pathResult = await this.writeImage(data, filename, filepath); 
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        try {
+          console.log('trying epic photo gasm')
+          data = await this.epiCPhotoGasm(prompt);
+          pathResult = await this.writeImage(data, filename, filepath);
+        } catch (err) {
+          console.log('not working');
+          try {
+            console.log('trying epic realism');
+            data = await this.epicRealism(prompt);
+            pathResult = await this.writeImage(data, filename, filepath);
+          } catch (err) {
+              console.log('not working');
+            try { 
+              console.log('trying majicMixFantasy')
+              data = await this.majicMixFantasy(prompt);
+              pathResult = await this.writeImage(data, filename, filepath);
+            } catch (err) {
+              console.log('not working');
+              try { 
+                console.log('trying absolute reality')
+                data = await this.absoluteReality(prompt);
+                pathResult = await this.writeImage(data, filename, filepath);
+              } catch (err) {
+                console.log('not working');
+                try { 
+                  console.log('trying dreamshaper v7')
+                  data = await this.dreamshaper_v7(prompt);
+                  pathResult = await this.writeImage(data, filename, filepath);
+                } catch (err) {
+                  console.log('not working');
+                  try { 
+                    console.log('trying animagine')
+                    data = await this.animagine(prompt);
                     pathResult = await this.writeImage(data, filename, filepath);
+                  } catch (err) {
+                    console.log('not working');
+                    try {
+                      console.log('trying AAM XL AnimeMix')
+                      data = await this.animeMix(prompt);
+                      pathResult = await this.writeImage(data, filename, filepath);
+                    } catch (err) {
+                      console.log('not working');
+                      try {
+                        console.log('trying animeMix turbo')
+                        data = await this.animeMixTurbo(prompt);
+                        pathResult = await this.writeImage(data, filename, filepath);
+                      } catch (err) {
+                        console.log('not working');
+                        try { 
+                          console.log('trying local diffusion')
+                          data = await this.localDiffusion(prompt);
+                          pathResult = await this.writeImageBase64(data, filename, filepath);
+                        } catch (err) {
+                          console.log('not working');
+                          data = await this.waifuDiffusion(prompt);
+                          pathResult = await this.writeImage(data, filename, filepath); 
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -122,27 +307,6 @@ class WaifuDiff {
     return response;
   }
 
-  private async eerieOrangeMix(prompt: string) : Promise<AxiosResponse<any>> {
-    const completePrompt = prompt + WaifuDiff.additionalPrompt;
-    const api = axios.create({
-      baseURL: "https://api-inference.huggingface.co/models/WarriorMama777/EerieOrangeMix",
-      headers: {
-        Authorization: `Bearer ${environment.HUGGING_FACE_API_TOKEN}`
-      }
-    });
-
-    let response = await api.post("/", {
-      inputs: completePrompt,
-      parameters: {
-        negative_prompt: WaifuDiff.negativePrompt,
-      }
-    }, { responseType: 'stream' });
-
-    if (response.status != 200) new Promise((r, reject) => { reject(); });
-
-    return response;
-  }
-
   private async epicRealism(prompt: string) : Promise<AxiosResponse<any>> {
     const completePrompt = prompt + WaifuDiff.additionalPrompt;
 
@@ -166,11 +330,11 @@ class WaifuDiff {
     return response;
   }
 
-  private async unstableDiffusersY(prompt: string) : Promise<AxiosResponse<any>> {
+  private async epiCPhotoGasm(prompt: string) : Promise<AxiosResponse<any>> {
     const completePrompt = prompt + WaifuDiff.additionalPrompt;
 
     const api = axios.create({
-      baseURL: "https://api-inference.huggingface.co/models/stablediffusionapi/sdxl-unstable-diffusers-y",
+      baseURL: "https://api-inference.huggingface.co/models/Yntec/epiCPhotoGasm",
       headers: {
         Authorization: `Bearer ${environment.HUGGING_FACE_API_TOKEN}`
       }
@@ -188,12 +352,55 @@ class WaifuDiff {
     return response;
   }
 
-  private async epiCPhotoGasm(prompt: string) : Promise<AxiosResponse<any>> {
-    // perfeito
+  private async animeMix(prompt: string) : Promise<AxiosResponse<any>> {
     const completePrompt = prompt + WaifuDiff.additionalPrompt;
 
     const api = axios.create({
-      baseURL: "https://api-inference.huggingface.co/models/Yntec/epiCPhotoGasm",
+      baseURL: "https://api-inference.huggingface.co/models/Lykon/AAM_XL_AnimeMix",
+      headers: {
+        Authorization: `Bearer ${environment.HUGGING_FACE_API_TOKEN}`
+      }
+    });
+
+    let response = await api.post("/", {
+      inputs: completePrompt,
+      parameters: {
+        negative_prompt: WaifuDiff.negativePrompt }
+      
+    }, { responseType: 'stream' });
+
+    if (response.status != 200) new Promise((r, reject) => { reject(); });
+
+    return response;
+  }
+
+  private async animeMixTurbo(prompt: string) : Promise<AxiosResponse<any>> {
+    const completePrompt = prompt + WaifuDiff.additionalPrompt;
+
+    const api = axios.create({
+      baseURL: "https://api-inference.huggingface.co/models/Lykon/AAM_XL_AnimeMix_Turbo",
+      headers: {
+        Authorization: `Bearer ${environment.HUGGING_FACE_API_TOKEN}`
+      }
+    });
+
+    let response = await api.post("/", {
+      inputs: completePrompt,
+      parameters: {
+        negative_prompt: WaifuDiff.negativePrompt }
+      
+    }, { responseType: 'stream' });
+
+    if (response.status != 200) new Promise((r, reject) => { reject(); });
+
+    return response;
+  }
+
+  private async majicMixFantasy(prompt: string) : Promise<AxiosResponse<any>> {
+    const completePrompt = prompt + WaifuDiff.additionalPrompt;
+
+    const api = axios.create({
+      baseURL: "https://api-inference.huggingface.co/models/digiplay/majicMIXfantasy_v2",
       headers: {
         Authorization: `Bearer ${environment.HUGGING_FACE_API_TOKEN}`
       }

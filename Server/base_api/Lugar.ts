@@ -43,7 +43,7 @@ LugarRouter.patch('/waifu/', async (req, res) => {
     prompt = gptResult.data.choices[0].message?.content.toString();
   }
 
-  const result = await waifuDiff.query(`place ${prompt}` || "Hello world");
+  const result = await waifuDiff.query(`place ${prompt}` || "Hello world", 'place');
 
   const imageParams = {
     id: parseInt(req.body.id),
